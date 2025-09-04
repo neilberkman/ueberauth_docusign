@@ -1,0 +1,103 @@
+name: ueberauth_docusign CI
+on: push
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          # Earliest supported version
+          - elixir: "1.16.0"
+            otp: "26.0"
+          # Latest 1.16 series
+          - elixir: "1.16.3"
+            otp: "26.2"
+          # Latest 1.17 series
+          - elixir: "1.17.3"
+            otp: "27.1"
+          # Latest 1.18 series with OTP 27
+          - elixir: "1.18.1"
+            otp: "27.2"
+          # Latest 1.18 series with OTP 28
+          - elixir: "1.18.4"
+            otp: "28.0"
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install Elixir
+        uses: erlef/setup-beam@v1
+        with:
+          otp-version: ${{ matrix.otp }}
+          elixir-version: ${{ matrix.elixir }}
+
+      # Standard caching pattern based on Phoenix Framework
+      - name: Cache deps
+        id: cache-deps
+        uses: actions/cache@v3
+        env:
+          cache-name: deps-v3
+        with:
+          path: deps
+          key: ${{ runner.os }}-mix-${{ env.cache-name }}-${{ matrix.elixir }}-${{ matrix.otp }}-${{ hashFiles('mix.lock', 'mix.exs') }}
+          restore-keys: |
+            ${{ runner.os }}-mix-${{ env.cache-name }}-${{ matrix.elixir }}-${{ matrix.otp }}-
+
+      - name: Cache compiled build
+        id: cache-build
+        uses: actions/cache@v3
+        env:
+          cache-name: build-v3
+        with:
+          path: _build
+          key: ${{ runner.os }}-mix-${{ env.cache-name }}-${{ matrix.elixir }}-${{ matrix.otp }}-${{ hashFiles('mix.lock', 'mix.exs') }}
+          restore-keys: |
+            ${{ runner.os }}-mix-${{ env.cache-name }}-${{ matrix.elixir }}-${{ matrix.otp }}-
+
+      # Cache PLT files for Dialyzer
+      - name: Cache Dialyzer PLT
+        uses: actions/cache@v3
+        if: matrix.elixir == '1.18.4' && matrix.otp == '28.0'
+        env:
+          cache-name: dialyzer-plt-v3
+        with:
+          path: priv/plts
+          key: ${{ runner.os }}-mix-${{ env.cache-name }}-${{ matrix.elixir }}-${{ matrix.otp }}-${{ hashFiles('mix.lock', 'mix.exs') }}
+          restore-keys: |
+            ${{ runner.os }}-mix-${{ env.cache-name }}-${{ matrix.elixir }}-${{ matrix.otp }}-
+
+      # Only clean if cache not found
+      - name: Install Dependencies
+        run: |
+          if [ ! -d "deps" ]; then
+            echo "Cache not found, performing clean install"
+            mix local.hex --force
+            mix local.rebar --force
+          fi
+          mix deps.get
+
+      - name: Compile app
+        run: MIX_ENV=test mix compile --warnings-as-errors
+
+      - name: Run Tests
+        run: |
+          set +e
+          mix test --trace --exclude integration
+
+      - name: Check formatting
+        if: matrix.elixir == '1.18.4' && matrix.otp == '28.0'
+        run: mix format --check-formatted
+
+      - name: Run Credo
+        if: matrix.elixir == '1.18.4' && matrix.otp == '28.0'
+        run: mix credo --strict
+
+      - name: Run Dialyzer
+        if: matrix.elixir == '1.18.4' && matrix.otp == '28.0'
+        run: |
+          mkdir -p priv/plts
+          mix dialyzer --format dialyxir
+
+      - name: Check Documentation
+        if: matrix.elixir == '1.18.4' && matrix.otp == '28.0'
+        run: mix docs

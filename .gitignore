@@ -1,0 +1,18 @@
+/_build
+/cover
+/deps
+/doc
+/.fetch
+erl_crash.dump
+*.ez
+ueberauth_docusign-*.tar
+/tmp
+.elixir_ls/
+mix.lock
+
+# Credentials and secrets
+config/test.secret.exs
+config/dev.secret.exs
+config/*.secret.exs
+.env
+.env.*
