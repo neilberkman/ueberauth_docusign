@@ -5,9 +5,9 @@ defmodule Ueberauth.Strategy.DocuSign.RealAPITest do
   """
   use ExUnit.Case, async: false
 
-  @moduletag :integration
-
   alias Ueberauth.Strategy.DocuSign.OAuth
+
+  @moduletag :integration
 
   describe "Real DocuSign API Tests" do
     test "generates valid OAuth URLs with real credentials" do

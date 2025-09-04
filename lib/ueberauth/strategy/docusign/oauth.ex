@@ -72,8 +72,7 @@ defmodule Ueberauth.Strategy.DocuSign.OAuth do
 
       {:ok, %OAuth2.Client{token: %OAuth2.AccessToken{} = token}}
       when is_nil(token.access_token) or token.access_token == "" ->
-        {:error,
-         %OAuth2.Error{reason: token.other_params["error_description"] || "invalid_token"}}
+        {:error, %OAuth2.Error{reason: token.other_params["error_description"] || "invalid_token"}}
 
       {:ok, %OAuth2.Client{token: token}} ->
         {:ok, token}
