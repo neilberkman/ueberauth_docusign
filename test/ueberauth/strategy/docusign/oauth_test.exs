@@ -1,5 +1,5 @@
 defmodule Ueberauth.Strategy.DocuSign.OAuthTest do
-  use ExUnit.Case, async: true
+  use ExUnit.Case, async: false
 
   alias Ueberauth.Strategy.DocuSign.OAuth
 
