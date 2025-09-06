@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### CI/Testing
+
+- Add Elixir 1.19-rc.0 to test matrix for early compatibility testing
+
 ## [0.1.0] - 2025-09-03
 
 ### Added
