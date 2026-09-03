@@ -62,7 +62,8 @@ defmodule UeberauthDocusign.MixProject do
     [
       extras: [
         "README.md",
-        "CHANGELOG.md": [title: "Changelog"]
+        "CHANGELOG.md": [title: "Changelog"],
+        LICENSE: [title: "License"]
       ],
       main: "readme",
       source_ref: "v#{@version}",
