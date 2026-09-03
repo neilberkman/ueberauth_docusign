@@ -26,7 +26,7 @@ Add `ueberauth_docusign` to your list of dependencies in `mix.exs`:
 def deps do
   [
     {:ueberauth, "~> 0.10"},
-    {:ueberauth_docusign, "~> 0.2.0"},
+    {:ueberauth_docusign, "~> 1.0"},
     # Optional: For making API calls after authentication
     {:docusign, "~> 3.0"}
   ]

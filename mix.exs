@@ -5,7 +5,7 @@ defmodule UeberauthDocusign.MixProject do
   alias Ueberauth.Strategy.DocuSign
   alias Ueberauth.Strategy.DocuSign.OAuth
 
-  @version "0.2.0"
+  @version "1.0.0"
   @url "https://github.com/neilberkman/ueberauth_docusign"
   @maintainers ["Neil Berkman"]
 
