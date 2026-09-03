@@ -36,10 +36,14 @@ defmodule Ueberauth.Strategy.DocuSign.OAuth do
       |> Keyword.merge(config)
       |> Keyword.merge(opts)
 
-    json_library = Ueberauth.json_library()
-
     OAuth2.Client.new(client_opts)
-    |> OAuth2.Client.put_serializer("application/json", json_library)
+    |> OAuth2.Client.put_serializer("application/json", json_library())
+  end
+
+  # Defaults to Elixir's built-in JSON module, but honours an application that
+  # has configured Ueberauth with a different JSON library.
+  defp json_library do
+    Application.get_env(:ueberauth, :json_library, JSON)
   end
 
   @doc """
@@ -60,7 +64,10 @@ defmodule Ueberauth.Strategy.DocuSign.OAuth do
   end
 
   def get_access_token(params \\ [], opts \\ []) do
-    case opts |> client() |> OAuth2.Client.get_token(params) do
+    opts
+    |> client()
+    |> OAuth2.Client.get_token(params)
+    |> case do
       {:error, %OAuth2.Response{body: _body, status_code: 401}} ->
         {:error, %OAuth2.Error{reason: "unauthorized"}}
 

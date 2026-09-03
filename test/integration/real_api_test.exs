@@ -1,7 +1,7 @@
 defmodule Ueberauth.Strategy.DocuSign.RealAPITest do
   @moduledoc """
-  Tests against real DocuSign API with actual credentials.
-  Run with: mix test test/integration/real_api_test.exs
+  Tests DocuSign OAuth behaviour with credentials supplied through the environment.
+  Run with: mix test --include integration test/integration/real_api_test.exs
   """
   use ExUnit.Case, async: false
 
@@ -9,12 +9,38 @@ defmodule Ueberauth.Strategy.DocuSign.RealAPITest do
 
   @moduletag :integration
 
+  if System.get_env("DOCUSIGN_CLIENT_ID") in [nil, ""] or
+       System.get_env("DOCUSIGN_CLIENT_SECRET") in [nil, ""] do
+    @moduletag skip: "DOCUSIGN_CLIENT_ID and DOCUSIGN_CLIENT_SECRET are not set"
+  end
+
+  setup do
+    client_id = System.fetch_env!("DOCUSIGN_CLIENT_ID")
+    client_secret = System.fetch_env!("DOCUSIGN_CLIENT_SECRET")
+    previous_config = Application.get_env(:ueberauth, OAuth)
+
+    Application.put_env(:ueberauth, OAuth,
+      client_id: client_id,
+      client_secret: client_secret
+    )
+
+    on_exit(fn ->
+      if previous_config do
+        Application.put_env(:ueberauth, OAuth, previous_config)
+      else
+        Application.delete_env(:ueberauth, OAuth)
+      end
+    end)
+
+    {:ok, client_id: client_id, client_secret: client_secret}
+  end
+
   describe "Real DocuSign API Tests" do
-    test "generates valid OAuth URLs with real credentials" do
+    test "generates valid OAuth URLs with environment credentials", context do
       client = OAuth.client(site: "https://account-d.docusign.com")
 
-      assert client.client_id == "4a3a7a9d-56cb-48f9-a9e5-e3da04b5484c"
-      assert client.client_secret == "0c54cf63-8a1a-460f-8a6c-cf7141fc4728"
+      assert client.client_id == context.client_id
+      assert client.client_secret == context.client_secret
       assert client.site == "https://account-d.docusign.com"
 
       auth_url =
@@ -28,7 +54,7 @@ defmodule Ueberauth.Strategy.DocuSign.RealAPITest do
         )
 
       assert auth_url =~ "https://account-d.docusign.com/oauth/auth"
-      assert auth_url =~ "client_id=4a3a7a9d-56cb-48f9-a9e5-e3da04b5484c"
+      assert auth_url =~ "client_id=#{URI.encode_www_form(context.client_id)}"
       assert auth_url =~ "response_type=code"
       assert auth_url =~ "scope=signature+extended"
       assert auth_url =~ "redirect_uri="

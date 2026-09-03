@@ -4,9 +4,8 @@ defmodule Ueberauth.Strategy.DocuSign.IntegrationTest do
 
   These tests are disabled by default. To run them:
 
-  1. Copy config/test.secret.exs.template to config/test.secret.exs
-  2. Fill in your real DocuSign credentials
-  3. Run: mix test --only integration
+  1. Set DOCUSIGN_CLIENT_ID and DOCUSIGN_CLIENT_SECRET in the environment
+  2. Run: mix test --include integration
 
   WARNING: These tests will make real API calls to DocuSign's demo environment.
   """
@@ -17,30 +16,36 @@ defmodule Ueberauth.Strategy.DocuSign.IntegrationTest do
   alias Ueberauth.Strategy.DocuSign.OAuth
 
   @moduletag :integration
-  @moduletag :skip
+
+  if System.get_env("DOCUSIGN_CLIENT_ID") in [nil, ""] or
+       System.get_env("DOCUSIGN_CLIENT_SECRET") in [nil, ""] do
+    @moduletag skip: "DOCUSIGN_CLIENT_ID and DOCUSIGN_CLIENT_SECRET are not set"
+  end
 
   describe "Real DocuSign OAuth Flow" do
     setup do
-      # Check if credentials are configured
-      client_id = Application.get_env(:ueberauth, OAuth)[:client_id]
-      client_secret = Application.get_env(:ueberauth, OAuth)[:client_secret]
+      client_id = System.fetch_env!("DOCUSIGN_CLIENT_ID")
+      client_secret = System.fetch_env!("DOCUSIGN_CLIENT_SECRET")
+      previous_config = Application.get_env(:ueberauth, OAuth)
 
-      if client_id == "YOUR_INTEGRATION_KEY_HERE" or is_nil(client_id) do
-        skip_reason = """
-        DocuSign credentials not configured. 
-        Please copy config/test.secret.exs.template to config/test.secret.exs 
-        and add your real credentials.
-        """
+      Application.put_env(:ueberauth, OAuth,
+        client_id: client_id,
+        client_secret: client_secret
+      )
 
-        {:ok, skip: skip_reason}
-      else
-        {:ok, client_id: client_id, client_secret: client_secret}
-      end
+      on_exit(fn ->
+        if previous_config do
+          Application.put_env(:ueberauth, OAuth, previous_config)
+        else
+          Application.delete_env(:ueberauth, OAuth)
+        end
+      end)
+
+      {:ok, client_id: client_id, client_secret: client_secret}
     end
 
-    @tag :skip
     test "client/0 creates valid OAuth client with real credentials", context do
-      client = OAuth.client()
+      client = OAuth.client(site: "https://account-d.docusign.com")
 
       assert client.client_id == context.client_id
       assert client.client_secret == context.client_secret
@@ -49,7 +54,6 @@ defmodule Ueberauth.Strategy.DocuSign.IntegrationTest do
       assert client.token_url == "/oauth/token"
     end
 
-    @tag :skip
     test "authorize_url/2 generates valid DocuSign authorization URL", _context do
       params = [
         scope: "signature extended",
@@ -57,17 +61,16 @@ defmodule Ueberauth.Strategy.DocuSign.IntegrationTest do
         redirect_uri: "http://localhost:4000/auth/docusign/callback"
       ]
 
-      url = OAuth.authorize_url!(params)
+      url = OAuth.authorize_url!(params, site: "https://account-d.docusign.com")
 
       assert url =~ "https://account-d.docusign.com/oauth/auth"
       assert url =~ "client_id="
       assert url =~ "response_type=code"
-      assert url =~ "scope=signature%20extended"
+      assert url =~ "scope=signature+extended" or url =~ "scope=signature%20extended"
       assert url =~ "state=test_state_123"
       assert url =~ "redirect_uri=http%3A%2F%2Flocalhost%3A4000%2Fauth%2Fdocusign%2Fcallback"
     end
 
-    @tag :skip
     test "environment switching between demo and production", _context do
       # Test demo environment
       demo_client = OAuth.client([{:site, "https://account-d.docusign.com"}])
@@ -85,7 +88,7 @@ defmodule Ueberauth.Strategy.DocuSign.IntegrationTest do
       #
       # To run this test manually:
       # 1. Remove the @tag :skip from this test
-      # 2. Run: mix test test/integration/docusign_oauth_integration_test.exs --only manual
+      # 2. Run: mix test --include integration test/integration/docusign_oauth_integration_test.exs --only manual
       # 3. Visit the URL printed below
       # 4. Log in to DocuSign and authorize the application
       # 5. Copy the 'code' parameter from the redirect URL
@@ -218,7 +221,6 @@ defmodule Ueberauth.Strategy.DocuSign.IntegrationTest do
   end
 
   describe "CSRF Protection" do
-    @tag :skip
     test "state parameter is preserved through flow", _context do
       state = :crypto.strong_rand_bytes(16) |> Base.url_encode64(padding: false)
 

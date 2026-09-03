@@ -105,7 +105,7 @@ defmodule Ueberauth.Strategy.DocuSign.OAuthTest do
 
         conn
         |> Plug.Conn.put_resp_content_type("application/json")
-        |> Plug.Conn.resp(200, Jason.encode!(body))
+        |> Plug.Conn.resp(200, JSON.encode!(body))
       end)
 
       opts = [site: "http://localhost:#{bypass.port}"]
@@ -120,7 +120,7 @@ defmodule Ueberauth.Strategy.DocuSign.OAuthTest do
       Bypass.expect_once(bypass, "POST", "/oauth/token", fn conn ->
         conn
         |> Plug.Conn.put_resp_content_type("application/json")
-        |> Plug.Conn.resp(401, Jason.encode!(%{"error" => "invalid_grant"}))
+        |> Plug.Conn.resp(401, JSON.encode!(%{"error" => "invalid_grant"}))
       end)
 
       opts = [site: "http://localhost:#{bypass.port}"]
@@ -138,7 +138,7 @@ defmodule Ueberauth.Strategy.DocuSign.OAuthTest do
 
         conn
         |> Plug.Conn.put_resp_content_type("application/json")
-        |> Plug.Conn.resp(200, Jason.encode!(body))
+        |> Plug.Conn.resp(200, JSON.encode!(body))
       end)
 
       opts = [site: "http://localhost:#{bypass.port}"]
@@ -180,7 +180,7 @@ defmodule Ueberauth.Strategy.DocuSign.OAuthTest do
 
         conn
         |> Plug.Conn.put_resp_content_type("application/json")
-        |> Plug.Conn.resp(200, Jason.encode!(%{"result" => "success"}))
+        |> Plug.Conn.resp(200, JSON.encode!(%{"result" => "success"}))
       end)
 
       opts = [site: "http://localhost:#{bypass.port}"]
@@ -197,7 +197,7 @@ defmodule Ueberauth.Strategy.DocuSign.OAuthTest do
                end)
 
         conn
-        |> Plug.Conn.resp(200, Jason.encode!(%{}))
+        |> Plug.Conn.resp(200, JSON.encode!(%{}))
       end)
 
       headers = [{"X-Custom-Header", "custom-value"}]

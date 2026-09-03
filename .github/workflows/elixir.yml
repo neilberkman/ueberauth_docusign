@@ -1,32 +1,29 @@
 name: ueberauth_docusign CI
-on: push
+on:
+  push:
+  pull_request:
 
 jobs:
   build:
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         include:
-          # Earliest supported version
-          - elixir: "1.16.0"
-            otp: "26.0"
-          # Latest 1.16 series
-          - elixir: "1.16.3"
-            otp: "26.2"
-          # Latest 1.17 series
-          - elixir: "1.17.3"
-            otp: "27.1"
-          # Latest 1.18 series with OTP 27
-          - elixir: "1.18.1"
-            otp: "27.2"
-          # Latest 1.18 series with OTP 28
-          - elixir: "1.18.4"
-            otp: "28.0"
-          # Testing with 1.19 RC
-          - elixir: "1.19.0-rc.0"
-            otp: "28.0"
+          # Latest 1.18 series
+          - elixir: "1.18.5"
+            otp: "27.3"
+            quality: false
+          # Latest 1.19 series with OTP 28
+          - elixir: "1.19.5"
+            otp: "28.5"
+            quality: false
+          # Latest 1.20 series with OTP 29
+          - elixir: "1.20.1"
+            otp: "29.0"
+            quality: true
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v7
 
       - name: Install Elixir
         uses: erlef/setup-beam@v1
@@ -37,7 +34,7 @@ jobs:
       # Standard caching pattern based on Phoenix Framework
       - name: Cache deps
         id: cache-deps
-        uses: actions/cache@v3
+        uses: actions/cache@v5
         env:
           cache-name: deps-v3
         with:
@@ -48,7 +45,7 @@ jobs:
 
       - name: Cache compiled build
         id: cache-build
-        uses: actions/cache@v3
+        uses: actions/cache@v5
         env:
           cache-name: build-v3
         with:
@@ -59,8 +56,8 @@ jobs:
 
       # Cache PLT files for Dialyzer
       - name: Cache Dialyzer PLT
-        uses: actions/cache@v3
-        if: matrix.elixir == '1.18.4' && matrix.otp == '28.0'
+        uses: actions/cache@v5
+        if: matrix.quality
         env:
           cache-name: dialyzer-plt-v3
         with:
@@ -83,24 +80,22 @@ jobs:
         run: MIX_ENV=test mix compile --warnings-as-errors
 
       - name: Run Tests
-        run: |
-          set +e
-          mix test --trace --exclude integration
+        run: mix test --trace
 
       - name: Check formatting
-        if: matrix.elixir == '1.18.4' && matrix.otp == '28.0'
+        if: matrix.quality
         run: mix format --check-formatted
 
       - name: Run Credo
-        if: matrix.elixir == '1.18.4' && matrix.otp == '28.0'
+        if: matrix.quality
         run: mix credo --strict
 
       - name: Run Dialyzer
-        if: matrix.elixir == '1.18.4' && matrix.otp == '28.0'
+        if: matrix.quality
         run: |
           mkdir -p priv/plts
           mix dialyzer --format dialyxir
 
       - name: Check Documentation
-        if: matrix.elixir == '1.18.4' && matrix.otp == '28.0'
+        if: matrix.quality
         run: mix docs

@@ -5,7 +5,7 @@ defmodule UeberauthDocusign.MixProject do
   alias Ueberauth.Strategy.DocuSign
   alias Ueberauth.Strategy.DocuSign.OAuth
 
-  @version "0.1.0"
+  @version "0.2.0"
   @url "https://github.com/neilberkman/ueberauth_docusign"
   @maintainers ["Neil Berkman"]
 
@@ -14,7 +14,7 @@ defmodule UeberauthDocusign.MixProject do
       name: "Ueberauth DocuSign",
       app: :ueberauth_docusign,
       version: @version,
-      elixir: "~> 1.16 or ~> 1.17 or ~> 1.18",
+      elixir: ">= 1.18.0",
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
       package: package(),
@@ -25,7 +25,6 @@ defmodule UeberauthDocusign.MixProject do
       description: "DocuSign OAuth2 strategy for Überauth",
       maintainers: @maintainers,
       dialyzer: [
-        ignore_warnings: ".dialyzer_ignore.exs",
         plt_add_apps: [:mix]
       ]
     ]
@@ -45,7 +44,6 @@ defmodule UeberauthDocusign.MixProject do
       # Runtime dependencies
       {:oauth2, "~> 2.0"},
       {:ueberauth, "~> 0.10"},
-      {:jason, "~> 1.4"},
 
       # Test dependencies
       {:bypass, "~> 2.1", only: :test},

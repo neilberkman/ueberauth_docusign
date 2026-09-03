@@ -7,9 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### CI/Testing
+## [0.2.0] - 2026-09-03
 
-- Add Elixir 1.19-rc.0 to test matrix for early compatibility testing
+### Changed
+
+- Raise the minimum supported Elixir version to 1.18.
+- Remove the Jason dependency in favour of Elixir's built-in JSON module.
+- Exclude integration tests by default and remove credentials from their source.
+- Update the CI matrix for the supported Elixir and OTP versions.
 
 ## [0.1.0] - 2025-09-03
 
@@ -42,5 +47,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Secure token handling
 - Support for production security best practices
 
-[Unreleased]: https://github.com/neilberkman/ueberauth_docusign/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/neilberkman/ueberauth_docusign/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/neilberkman/ueberauth_docusign/releases/tag/v0.2.0
 [0.1.0]: https://github.com/neilberkman/ueberauth_docusign/releases/tag/v0.1.0

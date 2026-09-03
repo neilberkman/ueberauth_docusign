@@ -164,7 +164,7 @@ defmodule Ueberauth.Strategy.DocuSignTest do
       Bypass.expect_once(bypass, "POST", "/oauth/token", fn conn ->
         conn
         |> Plug.Conn.put_resp_content_type("application/json")
-        |> Plug.Conn.resp(200, Jason.encode!(token_response))
+        |> Plug.Conn.resp(200, JSON.encode!(token_response))
       end)
 
       Bypass.expect(bypass, "GET", "/oauth/userinfo", fn conn ->
@@ -175,7 +175,7 @@ defmodule Ueberauth.Strategy.DocuSignTest do
 
         conn
         |> Plug.Conn.put_resp_content_type("application/json")
-        |> Plug.Conn.resp(200, Jason.encode!(user_response))
+        |> Plug.Conn.resp(200, JSON.encode!(user_response))
       end)
 
       opts = [
@@ -231,7 +231,7 @@ defmodule Ueberauth.Strategy.DocuSignTest do
       Bypass.expect_once(bypass, "POST", "/oauth/token", fn conn ->
         conn
         |> Plug.Conn.put_resp_content_type("application/json")
-        |> Plug.Conn.resp(401, Jason.encode!(%{"error" => "invalid_grant"}))
+        |> Plug.Conn.resp(401, JSON.encode!(%{"error" => "invalid_grant"}))
       end)
 
       opts = [
@@ -262,13 +262,13 @@ defmodule Ueberauth.Strategy.DocuSignTest do
       Bypass.expect_once(bypass, "POST", "/oauth/token", fn conn ->
         conn
         |> Plug.Conn.put_resp_content_type("application/json")
-        |> Plug.Conn.resp(200, Jason.encode!(token_response))
+        |> Plug.Conn.resp(200, JSON.encode!(token_response))
       end)
 
       Bypass.expect_once(bypass, "GET", "/oauth/userinfo", fn conn ->
         conn
         |> Plug.Conn.put_resp_content_type("application/json")
-        |> Plug.Conn.resp(401, Jason.encode!(%{"error" => "invalid_token"}))
+        |> Plug.Conn.resp(401, JSON.encode!(%{"error" => "invalid_token"}))
       end)
 
       opts = [

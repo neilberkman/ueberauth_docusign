@@ -26,7 +26,7 @@ Add `ueberauth_docusign` to your list of dependencies in `mix.exs`:
 def deps do
   [
     {:ueberauth, "~> 0.10"},
-    {:ueberauth_docusign, "~> 0.1.0"},
+    {:ueberauth_docusign, "~> 0.2.0"},
     # Optional: For making API calls after authentication
     {:docusign, "~> 3.0"}
   ]
@@ -268,6 +268,17 @@ def refresh_token(refresh_token) do
   end
 end
 ```
+
+## Running Integration Tests
+
+Integration tests are excluded from the default test run. To run them, set
+`DOCUSIGN_CLIENT_ID` and `DOCUSIGN_CLIENT_SECRET` in the environment and run:
+
+```shell
+mix test --include integration
+```
+
+Tests that require credentials skip cleanly when either variable is absent.
 
 ## Security Considerations
 
